@@ -1,38 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { EventDto } from './dto/event.dto';
+import { EventDao } from './data/dao/event.dao';
 
 @Injectable()
 export class EventsService {
 
-    events: EventDto[] = [];
+   constructor(
+    private dao: EventDao
+   ){}
 
-    add(event: EventDto){
-        this.events.push(event);
+    async add(event: EventDto){
+        await this.dao.insert(event);
     }
 
-    update(id: string, event: EventDto){
-        const index = this.events.findIndex((e)=> e.id == event.id);
-        if(index == undefined){
-            return
-        }
-        this.events[index] = event;
+    async update(id: string, event: EventDto) {
+        await this.dao.update(id, event);
     }
 
-    remove(id: string) {
-        const index = this.events.findIndex((e)=> e.id == id);
-        if(index == undefined){
-            return
-        }
-        this.events.splice(index, 1);
+    async remove(id: string) {
+        await this.dao.remove(id);
     }
 
-    get(page: number, pageSize:  number): EventDto[]{
-        return this.events;
+    get(page?: number, pageSize?:  number): Promise<EventDto[]>{
+        return this.dao.getOnlyActive(page, pageSize);
     }
-
-    getById(id: string): EventDto | undefined {
-        return this.events.find((e)=> e.id == id);
-    }
-
-
 }
